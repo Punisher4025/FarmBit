@@ -18,8 +18,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
+  bool _isSearching = false;
   WeatherData? _weatherData;
   List<Map<String, dynamic>> _searchResults = [];
+  String _lastSearchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   
   // Default location: New Delhi, India
@@ -69,16 +71,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _onSearchChanged(String query) async {
-    if (query.trim().isEmpty) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
       setState(() {
         _searchResults = [];
+        _isSearching = false;
+        _lastSearchQuery = '';
       });
       return;
     }
-    final results = await WeatherService.searchLocation(query);
     setState(() {
-      _searchResults = results;
+      _isSearching = true;
+      _lastSearchQuery = trimmed;
     });
+    try {
+      final results = await WeatherService.searchLocation(trimmed);
+      // Only update if the query hasn't changed while we were fetching
+      if (_lastSearchQuery == trimmed) {
+        setState(() {
+          _searchResults = results;
+          _isSearching = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _searchResults = [];
+        _isSearching = false;
+      });
+    }
   }
 
   void _selectLocation(Map<String, dynamic> location) {
@@ -248,7 +268,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                            if (_searchResults.isNotEmpty)
+                            // Search loading spinner
+                            if (_isSearching)
+                              Container(
+                                margin: const EdgeInsets.only(top: 8),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E293B),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.blueGrey.shade700),
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 18, height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.teal,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text('Searching...', style: TextStyle(color: Colors.white70)),
+                                  ],
+                                ),
+                              )
+                            // Search results list
+                            else if (_searchResults.isNotEmpty)
                               Container(
                                 margin: const EdgeInsets.only(top: 8),
                                 decoration: BoxDecoration(
@@ -275,6 +321,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onTap: () => _selectLocation(loc),
                                     );
                                   },
+                                ),
+                              )
+                            // No results state
+                            else if (_lastSearchQuery.isNotEmpty && !_isSearching)
+                              Container(
+                                margin: const EdgeInsets.only(top: 8),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E293B),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.blueGrey.shade700),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.search_off, color: Colors.blueGrey.shade500, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'No results for "$_lastSearchQuery"',
+                                      style: TextStyle(color: Colors.blueGrey.shade400),
+                                    ),
+                                  ],
                                 ),
                               ),
                           ],
