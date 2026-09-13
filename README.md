@@ -6,7 +6,7 @@ FarmBit is a machine-learning-based agricultural application designed to help us
 
 📱 Download FarmBit
 
-⬇️ "Download FarmBit v1.0.0" (YOUR_GITHUB_RELEASE_LINK)
+⬇️ "Download FarmBit v1.0.0" ([⬇️ Download FarmBit v1.0.0](https://github.com/Punisher4025/FarmBit/releases/tag/v1.0.0))
 
 «Note: This is an Android APK. Download and install it on your Android device.»
 
