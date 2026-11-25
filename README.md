@@ -21,7 +21,7 @@ FarmBit is a machine-learning-based agricultural application designed to help us
 - 🏪 Mandi Price Information
 - 📱 Flutter & Dart Android Application
 - 🤖 Machine Learning-Based Prediction
-- 🔥 Firebase/Firestore Integration
+
 
 ---
 
